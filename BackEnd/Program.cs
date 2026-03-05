@@ -43,12 +43,12 @@ builder.Services.AddMediatR(cfg =>
 
 //마이그레이션 기능에게 하나만 먼저 추가
 builder.Services.AddDbContext<AccountDBContext>(option =>
-	option.UseMySQL(builder.Configuration.GetConnectionString("WirteConnection")!));
+	option.UseMySQL(builder.Configuration.GetConnectionString("WriteConnection")!));
 
-var wirteConnection = builder.Configuration.GetConnectionString("WirteConnection");
+var writeConnection = builder.Configuration.GetConnectionString("WriteConnection");
 builder.Services.AddKeyedSingleton<IDbContextFactory<AccountDBContext>>("Write", (sp, key) => {
 	var options = new DbContextOptionsBuilder<AccountDBContext>()
-		.UseMySQL(wirteConnection!)
+		.UseMySQL(writeConnection!)
 		.Options;
 	return new DbContextFactory<AccountDBContext>(sp, options, new DbContextFactorySource<AccountDBContext>());
 });
