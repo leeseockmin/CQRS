@@ -1,8 +1,4 @@
 namespace BackEnd.Application.DTOs.Employee
 {
-    public record GetEmployeeListRequest
-    {
-        public int Page { get; init; } = 1;
-        public int PageSize { get; init; } = 20;
-    }
+    public record GetEmployeeListRequest(int Page = 1, int PageSize = 20);
 }
