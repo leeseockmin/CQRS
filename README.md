@@ -334,12 +334,7 @@ main            — 운영 배포 (시니어 개발자 승인 필수)
 ## 자주 사용하는 명령어
 
 ### EF Core 마이그레이션
-```bash
-dotnet ef migrations add {마이그레이션명} --project BackEnd
-dotnet ef database update --project BackEnd
-dotnet ef migrations remove --project BackEnd
-dotnet ef migrations list --project BackEnd
-```
+마이그레이션 방법 참고.
 
 ### 테스트 실행
 ```bash
