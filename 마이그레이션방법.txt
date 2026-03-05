@@ -1,5 +1,58 @@
-Add-Migration InitialCreate -Context AccountDBContext -Project DB.Data -OutputDir "Migrations\AccountMigrations" -> 바뀐 데이터 추가
-Update-Database -Context AccountDBContext -Project DB.Data -StartupProject BackEnd -> DB에 갱신
+====================================================
+EF Core 마이그레이션 방법 (Package Manager Console)
+====================================================
 
+Visual Studio → 도구 → NuGet 패키지 관리자 → 패키지 관리자 콘솔 에서 실행합니다.
+기본 프로젝트(Default project)는 BackEnd 로 설정 후 실행하세요.
 
-Script-Migration -From 0 -To CreateAccountLink -> 스크립트로 따로 뽑아서 확인용
+----------------------------------------------------
+1. 마이그레이션 추가 (스키마 변경 후 실행)
+----------------------------------------------------
+Add-Migration {마이그레이션명} -Context AccountDBContext -Project DB.Data -OutputDir "Migrations\AccountMigrations"
+
+예시)
+Add-Migration InitialCreate     -Context AccountDBContext -Project DB.Data -OutputDir "Migrations\AccountMigrations"
+Add-Migration AddEmployeeIndex  -Context AccountDBContext -Project DB.Data -OutputDir "Migrations\AccountMigrations"
+
+----------------------------------------------------
+2. DB 업데이트 (마이그레이션을 실제 DB에 적용)
+----------------------------------------------------
+Update-Database -Context AccountDBContext -Project DB.Data -StartupProject BackEnd
+
+----------------------------------------------------
+3. 특정 마이그레이션으로 롤백
+----------------------------------------------------
+Update-Database {마이그레이션명} -Context AccountDBContext -Project DB.Data -StartupProject BackEnd
+
+예시) InitialCreate 시점으로 되돌리기
+Update-Database InitialCreate -Context AccountDBContext -Project DB.Data -StartupProject BackEnd
+
+예시) 모든 마이그레이션 롤백 (DB 초기화)
+Update-Database 0 -Context AccountDBContext -Project DB.Data -StartupProject BackEnd
+
+----------------------------------------------------
+4. 마지막 마이그레이션 제거 (DB 적용 전에만 가능)
+----------------------------------------------------
+Remove-Migration -Context AccountDBContext -Project DB.Data
+
+----------------------------------------------------
+5. 마이그레이션 목록 확인
+----------------------------------------------------
+Get-Migration -Context AccountDBContext -Project DB.Data
+
+----------------------------------------------------
+6. SQL 스크립트로 추출 (배포 확인용)
+----------------------------------------------------
+Script-Migration -From 0 -To {마이그레이션명} -Context AccountDBContext -Project DB.Data
+
+예시) 전체 스크립트 추출
+Script-Migration -From 0 -To InitialCreate -Context AccountDBContext -Project DB.Data
+
+====================================================
+주의사항
+====================================================
+- Entity 클래스(Employee.cs 등) 변경 후 반드시 Add-Migration 실행
+- Update-Database 전에 appsettings.json 의 WriteConnection 연결 문자열 확인
+- 마이그레이션 파일은 DB.Data/Migrations/AccountMigrations/ 에 자동 생성됨
+- Remove-Migration 은 DB에 적용(Update-Database)하기 전에만 사용 가능
+====================================================

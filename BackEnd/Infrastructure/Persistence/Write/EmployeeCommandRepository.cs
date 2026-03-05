@@ -36,42 +36,5 @@ namespace BackEnd.Infrastructure.Repositories
                 });
             });
         }
-
-        public async Task<int> UpdateAsync(Employee employee)
-        {
-
-            return await _dbManager.ExecuteAsync(DataBaseManager.DBType.Write, async connection =>
-            {
-                const string sql = $@"
-                    UPDATE Employee
-                    SET {nameof(Employee.name)} = @{nameof(Employee.name)},
-                        {nameof(Employee.email)} = @{nameof(Employee.email)},
-                        {nameof(Employee.tel)} = @{nameof(Employee.tel)},
-                        {nameof(Employee.joined)} = @{nameof(Employee.joined)},
-                        {nameof(Employee.updatedAt)} = @{nameof(Employee.updatedAt)}
-                    WHERE {nameof(Employee.employeeId)} = @{nameof(Employee.employeeId)}
-                    ";
-
-                return await connection.ExecuteAsync(sql, new
-                {
-                    employee.employeeId,
-                    employee.name,
-                    employee.email,
-                    employee.tel,
-                    employee.joined,
-                    employee.updatedAt
-                });
-            });
-        }
-
-        public async Task<int> DeleteAsync(int employeeId)
-        {
-
-            return await _dbManager.ExecuteAsync(DataBaseManager.DBType.Write, async connection =>
-            {
-                const string sql = $"DELETE FROM Employee WHERE {nameof(Employee.employeeId)} = @{nameof(Employee.employeeId)}";
-                return await connection.ExecuteAsync(sql, new { employeeId });
-            });
-        }
     }
 }
