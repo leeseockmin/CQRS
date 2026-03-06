@@ -2,10 +2,8 @@ using BackEnd.Application.Interfaces.Employee;
 using BackEnd.Infrastructure.DataBase;
 using BackEnd.Infrastructure.Persistence.Read;
 using BackEnd.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore.Design;
 using DB.Data.AccountDB;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +42,7 @@ builder.Services.AddKeyedSingleton<IDbContextFactory<AccountDBContext>>("Write",
 	var options = new DbContextOptionsBuilder<AccountDBContext>()
 		.UseMySql(writeConnection!, ServerVersion.AutoDetect(writeConnection!))
 		.Options;
-	return new DbContextFactory<AccountDBContext>(sp, options, new DbContextFactorySource<AccountDBContext>());
+	return new SimpleDbContextFactory<AccountDBContext>(options);
 });
 
 // Slave 설정
@@ -53,7 +51,7 @@ builder.Services.AddKeyedSingleton<IDbContextFactory<AccountDBContext>>("Read", 
 	var options = new DbContextOptionsBuilder<AccountDBContext>()
 		.UseMySql(readConnection!, ServerVersion.AutoDetect(readConnection!))
 		.Options;
-	return new DbContextFactory<AccountDBContext>(sp, options, new DbContextFactorySource<AccountDBContext>());
+	return new SimpleDbContextFactory<AccountDBContext>(options);
 });
 
 

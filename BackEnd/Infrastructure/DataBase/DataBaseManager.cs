@@ -39,9 +39,10 @@ namespace BackEnd.Infrastructure.DataBase
 
 			}
 
-            if(factory == null)
+            if (factory == null)
             {
-                return null;
+                _logger.LogError($"DBContext Factory를 찾을 수 없습니다. DBType: {dbType}");
+                throw new InvalidOperationException($"지원하지 않는 DBType입니다. DBType: {dbType}");
             }
 
 			return await factory.CreateDbContextAsync();
@@ -126,9 +127,13 @@ namespace BackEnd.Infrastructure.DataBase
             {
                 bool isSuccess = await func(connection, transaction);
                 if (isSuccess)
+                {
                     await transaction.CommitAsync();
+                }
                 else
+                {
                     await transaction.RollbackAsync();
+                }
             }
             catch (Exception ex)
             {
