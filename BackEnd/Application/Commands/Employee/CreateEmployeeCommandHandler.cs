@@ -57,7 +57,13 @@ namespace BackEnd.Application.Commands.Employee
                     throw new ArgumentException($"email 형식이 올바르지 않습니다. 입력값: '{req.Email}'");
                 }
 
-                var normalizedTel = EmployeeUtils.RemoveNonNumeric(req.Tel ?? string.Empty);
+                var normalizedTel = EmployeeUtils.RemoveNonNumeric(req.Tel);
+                if (string.IsNullOrEmpty(normalizedTel))
+                {
+                    _logger.LogError($"tel이 비어있습니다.");
+                    throw new ArgumentException("tel은 필수 입력값입니다.");
+                }
+
                 if (normalizedTel.Length > EmployeeConstants.TelMaxLength)
                 {
                     _logger.LogError($"tel 길이 초과. 입력값 길이: {normalizedTel.Length}");

@@ -533,5 +533,404 @@ namespace BackEnd.Tests.Commands
                 r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
                 Times.Never);
         }
+
+        // =============================================
+        // 복수 항목 전체 실패 케이스
+        // =============================================
+
+        /// <summary>
+        /// [실패] 복수 요청 전체의 Name이 비어있는 경우 — 첫 번째 항목에서 ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_AllItemsHaveEmptyName_ThrowsArgumentException()
+        {
+            // Arrange — 3명 모두 Name 빈 문자열
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("", "lee@example.com",  "01022345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("", "kang@example.com", "01033345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("name은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 전체의 Email이 비어있는 경우 — 첫 번째 항목에서 ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_AllItemsHaveEmptyEmail_ThrowsArgumentException()
+        {
+            // Arrange — 3명 모두 Email 빈 문자열
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "", "01022345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("강감찬", "", "01033345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 전체의 Email 형식이 올바르지 않은 경우 — 첫 번째 항목에서 ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_AllItemsHaveInvalidEmail_ThrowsArgumentException()
+        {
+            // Arrange — 3명 모두 Email 형식 오류
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "not-an-email", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "also-invalid", "01022345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("강감찬", "bad-email",    "01033345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email 형식이 올바르지 않습니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        // =============================================
+        // 복수 항목 중 두 번째 항목 — Name 이외 필드 개별 실패 케이스
+        // =============================================
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Email이 null인 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasNullEmail_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", null!,              "01022345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Email이 빈 문자열인 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasEmptyEmail_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "",                 "01022345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Email이 공백으로만 이루어진 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasWhitespaceEmail_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "   ",              "01022345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Email 형식이 올바르지 않은 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasInvalidEmail_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "not-an-email",     "01022345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email 형식이 올바르지 않습니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Email이 128자를 초과하는 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemEmailExceedsMaxLength_ThrowsArgumentException()
+        {
+            // Arrange — 두 번째 항목 Email 129자 (로컬 파트 123자 + "@x.com" 6자)
+            var longEmail = $"{new string('a', 123)}@x.com";
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", longEmail,          "01022345678", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("email은 최대 128자까지 허용됩니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Tel이 하이픈 제거 후 16자를 초과하는 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemTelExceedsMaxLength_ThrowsArgumentException()
+        {
+            // Arrange — 두 번째 항목 Tel 17자
+            var longTel = new string('1', 17);
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "lee@example.com",  longTel,       DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 하이픈 제거 후 최대 16자까지 허용됩니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        // =============================================
+        // 실패 케이스 — Tel 비어있음
+        // =============================================
+
+        /// <summary>
+        /// [실패] Tel이 null인 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_TelIsNull_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", null!, DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] Tel이 빈 문자열인 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_TelIsEmpty_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] Tel이 공백으로만 이루어진 경우 — RemoveNonNumeric 후 빈 문자열이 되어 ArgumentException이 발생한다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_TelIsWhitespace_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "   ", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 전체의 Tel이 비어있는 경우 — 첫 번째 항목에서 ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_AllItemsHaveEmptyTel_ThrowsArgumentException()
+        {
+            // Arrange — 3명 모두 Tel 빈 문자열
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "lee@example.com",  "", DateTime.UtcNow),
+                new CreateEmployeeRequest("강감찬", "kang@example.com", "", DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Tel이 null인 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasNullTel_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "lee@example.com",  null!,         DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Tel이 빈 문자열인 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasEmptyTel_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "lee@example.com",  "",            DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
+
+        /// <summary>
+        /// [실패] 복수 요청 중 두 번째 항목의 Tel이 공백으로만 이루어진 경우 — ArgumentException이 발생하고 BulkInsertAsync는 호출되지 않는다.
+        /// </summary>
+        [Fact]
+        public async Task Handle_SecondItemHasWhitespaceTel_ThrowsArgumentException()
+        {
+            // Arrange
+            var requests = new List<CreateEmployeeRequest>
+            {
+                new CreateEmployeeRequest("홍길동", "hong@example.com", "01012345678", DateTime.UtcNow),
+                new CreateEmployeeRequest("이순신", "lee@example.com",  "   ",         DateTime.UtcNow)
+            };
+            var command = new CreateEmployeeCommand(requests);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(
+                () => _handler.Handle(command, CancellationToken.None));
+
+            Assert.Contains("tel은 필수 입력값입니다.", ex.Message);
+            _mockCommandRepository.Verify(
+                r => r.BulkInsertAsync(It.IsAny<List<EmployeeEntity>>()),
+                Times.Never);
+        }
     }
 }
