@@ -25,7 +25,7 @@ namespace BackEnd.Infrastructure.Persistence.Read
                 const string sql = $@"
                     SELECT {nameof(Employee.employeeId)}, {nameof(Employee.name)}, {nameof(Employee.email)}, {nameof(Employee.tel)}, {nameof(Employee.joined)}
                     FROM Employee
-                    ORDER BY {nameof(Employee.joined)} ASC
+                    ORDER BY {nameof(Employee.employeeId)} ASC
                     LIMIT @PageSize OFFSET @Offset
                     ";
 
