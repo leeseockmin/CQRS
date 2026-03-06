@@ -85,7 +85,7 @@ namespace BackEnd.Application.Commands.Employee
             }
 
             var insertedCount = await _commandRepository.BulkInsertAsync(employees);
-            await _mongoLogService.LogAsync("Employee", "CREATE", employees);
+            await _mongoLogService.LogAsync("Employee", "CREATE", request.CreateEmployees);
             return insertedCount;
         }
     }
