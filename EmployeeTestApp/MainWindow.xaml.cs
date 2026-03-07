@@ -321,7 +321,7 @@ namespace EmployeeTestApp
         private async Task PostEmployeesAsync(List<EmployeeRequest> requests, string source)
         {
             var baseUrl = TxtBaseUrl.Text.TrimEnd('/');
-            var url = $"{baseUrl}/api/Employee";
+            var url = $"{baseUrl}/api/Employee/create";
 
             var bodyJson = JsonSerializer.Serialize(requests, _serializeOpts);
             var httpContent = new StringContent(bodyJson, Encoding.UTF8, "application/json");

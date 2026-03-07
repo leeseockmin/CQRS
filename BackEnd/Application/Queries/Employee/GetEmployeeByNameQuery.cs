@@ -3,5 +3,5 @@ using MediatR;
 
 namespace BackEnd.Application.Queries.Employee
 {
-    public record GetEmployeeByNameQuery(string Name) : IRequest<EmployeeDto?>;
+    public record GetEmployeeByNameQuery(string Name) : IRequest<List<EmployeeDto>>;
 }

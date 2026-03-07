@@ -46,18 +46,19 @@ namespace BackEnd.Infrastructure.Persistence.Read
             });
         }
 
-        public async Task<EmployeeDto?> GetByNameAsync(string name)
+        public async Task<List<EmployeeDto>> GetByNameAsync(string name)
         {
             return await _dbManager.ExecuteAsync(DataBaseManager.DBType.Read, async connection =>
             {
                 const string sql = $@"
                     SELECT {nameof(Employee.employeeId)}, {nameof(Employee.name)}, {nameof(Employee.email)}, {nameof(Employee.tel)}, {nameof(Employee.joined)}
                     FROM Employee
-                    WHERE {nameof(Employee.name)} = @{nameof(Employee.name)}
-                    LIMIT 1
+                    WHERE {nameof(Employee.name)} LIKE @Name
+                    ORDER BY {nameof(Employee.employeeId)} ASC
                     ";
 
-                return await connection.QueryFirstOrDefaultAsync<EmployeeDto>(sql, new { name });
+                var result = await connection.QueryAsync<EmployeeDto>(sql, new { Name = $"%{name}%" });
+                return result.ToList();
             });
         }
     }

@@ -6,6 +6,6 @@ namespace BackEnd.Application.Interfaces.Employee
     {
         Task<List<EmployeeDto>> GetListAsync(int page, int pageSize);
         Task<int> GetTotalCountAsync();
-        Task<EmployeeDto?> GetByNameAsync(string name);
+        Task<List<EmployeeDto>> GetByNameAsync(string name);
     }
 }

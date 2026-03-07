@@ -22,24 +22,28 @@ namespace BackEnd.Controllers
         }
 
         /// <summary>이름으로 직원 상세 연락정보를 조회합니다.</summary>
-        [HttpGet("{name}")]
-        [ProducesResponseType(typeof(EmployeeDto), StatusCodes.Status200OK)]
+        /// <remarks>GET /api/employee/search?name={name}</remarks>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(GetEmployeeByNameResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetEmployeeByNameAsync(string name)
+        public async Task<IActionResult> GetEmployeeByNameAsync([FromQuery] GetEmployeeByNameRequest request)
         {
-            var result = await _mediator.Send(new GetEmployeeByNameQuery(name));
-
-            if (result is null)
+            try
             {
-                _logger.LogError($"직원 조회 결과 없음. Name: {name}");
-                return NotFound(new ErrorResponse($"이름 '{name}'에 해당하는 직원이 없습니다."));
+                var result = await _mediator.Send(new GetEmployeeByNameQuery(request.Name));
+                return Ok(new GetEmployeeByNameResult(result));
             }
-
-            return Ok(result);
+            catch (ArgumentException ex)
+            {
+                _logger.LogError($"직원 이름 조회 유효성 검사 실패. Message: {ex.Message}");
+                return BadRequest(new ErrorResponse(ex.Message));
+            }
         }
 
         /// <summary>직원 목록을 페이지 단위로 조회합니다.</summary>
-        [HttpGet]
+        /// <remarks>GET /api/employee/list?page={page}&amp;pageSize={pageSize}</remarks>
+        [HttpGet("list")]
         [ProducesResponseType(typeof(EmployeeListResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetEmployeeListAsync([FromQuery] GetEmployeeListRequest request)
@@ -55,7 +59,8 @@ namespace BackEnd.Controllers
         }
 
         /// <summary>직원 목록을 일괄 등록합니다.</summary>
-        [HttpPost]
+        /// <remarks>POST /api/employee/create</remarks>
+        [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateEmployeeAsync([FromBody] List<CreateEmployeeRequest> request)
